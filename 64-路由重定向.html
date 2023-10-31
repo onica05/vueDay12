@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入vue.js库文件 -->
+    <script type="text/javascript" src="../JS/vue.js"></script>
+    <!-- 1.已安装vue-router -->
+    <script src="https://unpkg.com/vue-router@3"></script>
+    <title>路由重定向</title>
+</head>
+
+<body>
+    <!-- 路由重定向：指用户在访问地址A的时候，强制用户跳转到地址C，从而展示特定的组件页面。通过路由规则的redirecr属性，指定一个新的路由地址，可以很方便的设置路由的重定向。
+        语法规则：
+        var router = new VueRouter({
+            routes:[
+            其中 Path表示需要被重定向的 原地址，redirect表示将要被重定向到的地址
+            {path:'/', redirect:'/user'},
+            {path:'/user', component:User},
+            {path:'/register', component:Register},
+
+            ]
+        })
+    
+    -->
+
+    <div id="app">
+        <!-- 2.添加路由链接 -->
+        <router-link to="/user">User</router-link>
+        <router-link to="/register">Register</router-link>
+
+        <!-- 3.路由占位符 -->
+        <router-view></router-view>
+
+    </div>
+
+    <script type="text/javascript">
+        // 4.定义路由组件
+        var User = {
+            template: '<div>User组件</div>'
+        }
+        var Register = {
+            template: '<div>Register 组件</div>'
+        }
+
+        // 5.创建路由实例对象
+        var router = new VueRouter({
+            // routes 是所有的路由规则 数组    ->有几个路由链接，就有几个对象
+            routes: [
+                // 路由重定向：让页面一开就显示user组件
+                {path:'/', redirect:'/user'},
+                // 每个路由规则都是一个配置对象，其中至少包含path，component两个属性； path: 表示当前路由规则匹配的 hash 地址； component：表示当前路由规则对应要展示的组件
+                { path: '/user', component: User },
+                { path: '/register', component: Register }
+
+            ]
+        })
+
+        var vm = new Vue({
+            el: '#app',
+            data: {
+
+            },
+            // 6.把路由挂载到vue实例中，Vue中有router这个属性，然后这个属性值就等于上面第5步创建的路由实例对象
+            // router:router, 属性名称和属性值是一样的直接简写
+            router: router
+
+        });
+
+
+    </script>
+</body>
+
+</html>

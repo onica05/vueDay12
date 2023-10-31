@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入vue.js库文件 -->
+    <script type="text/javascript" src="../JS/vue.js"></script>
+    <!-- 1.已安装vue-router -->
+    <script src="https://unpkg.com/vue-router@3"></script>
+    <title>动态路由参数传递</title>
+</head>
+
+<body>
+    <!-- 动态路由参数传递：使用$route不够灵活，采用最好采用props将组件和路由关联
+        1.props的值为布尔值类型
+        const router =  new VueRouter({
+            routes:[
+            如果props被设置为true，route.params 将会设置为组件属性
+            {path:'/user/:id', component:User, props:true}
+            ]
+        })
+        const User = {
+            使用Props 接收路由参数
+            props:['id'],
+            使用路由参数
+            template:'<div> 用户ID：{{id}} </div>'
+        }
+        
+
+        2.props的值为对象类型
+        const router =  new VueRouter({
+            routes:[
+            如果props是一个对象，它会被原样设置为组件属性
+            {path:'/user/:id', component:User, props:{uname:'mike', age:12}}
+            ]
+        })
+        const User = {
+            使用Props 接收路由参数
+            props:['uname', "age"],
+            使用路由参数
+            template:'<div> 用户信息：{{uname +'----'+ age}} </div>'
+        }
+
+
+        3.props的值为函数类型
+        const router =  new VueRouter({
+            routes:[
+            如果props是函数，则这个函数接收route对象为自己的形参
+            {path:'/user/:id', 
+            component:User, 
+            props:route => ({uname: 'andy', age: 25, id: route.params.id})
+            
+            ]
+        })
+        const User = {
+            使用Props 接收路由参数
+            props:['uname', "age", "id"],
+            使用路由参数
+            template:'<div> 用户信息：{{uname +'----'+ age +'----'+ id}} </div>'
+        }
+    
+    -->
+
+    <div id="app">
+        <!-- 2.添加路由链接 -->
+        <router-link to="/user/1">User1</router-link>
+        <router-link to="/user/2">User2</router-link>
+        <router-link to="/user/3">User3</router-link>
+        <router-link to="/info">Info</router-link>
+        <router-link to="/pro/1">UserinfoPro</router-link>
+        <router-link to="/register">Register</router-link>
+
+        <!-- 3.路由占位符 -->
+        <router-view></router-view>
+
+    </div>
+    <!-- 需求：两个父组件-user,register。当点击register的时候显示子组件tab1,tab2。这两个子组件是 嵌套 在父组件register里面的 -->
+    <script type="text/javascript">
+        // 4.定义路由组件
+        var User = {
+            // 使用Props 接收路由参数,这一句不要忘记，不然ID不会显示
+            props:['id'],
+            // 使用路由参数
+            template: '<h1>User组件 ---- 用户ID为:{{id}}</h1>',
+        }
+        var Info = {
+            // 使用Props 接收路由参数,这一句不要忘记，
+            props:['uname', 'age'],
+            // 使用路由参数
+            template: '<h1>Info组件 ---- 用户信息为:{{ uname + "----" + age }}</h1>',
+        }
+        var UserinfoPro = {
+            // 使用Props 接收路由参数,这一句不要忘记，
+            props:['uname', 'age', 'id'],
+            // 使用路由参数
+            template: '<h1>UserinfoPro组件 ----用户ID为:{{id}}--- 用户信息为:{{ uname + "----" + age }}</h1>',
+        }
+        var Register = {
+            template: `
+            <div>
+                <h1>Register组件</h1>
+                <hr/>
+
+                <!-- 子路由组件链接 -->
+                <router-link to="/register/tab1">tab1</router-link>
+                <router-link to="/register/tab2">tab2</router-link>
+
+                <!-- 子路由占位符 -->
+                <router-view></router-view>
+            </div>
+            `
+        }
+        // 定义子路由组件
+        var Tab1 = {
+            template: '<h3>tab1 子组件</h3>'
+
+        }
+        var Tab2 = {
+            template: '<h3>tab2 子组件</h3>'
+
+        }
+
+
+        // 5.创建路由实例对象
+        var router = new VueRouter({
+            // routes 是所有的路由规则 数组    ->有几个路由链接，就有几个对象
+            routes: [
+                // 路由重定向：让页面一开就显示user组件
+                { path: '/', redirect: '/user' },
+                // 每个路由规则都是一个配置对象，其中至少包含path，component两个属性； path: 表示当前路由规则匹配的 hash 地址； component：表示当前路由规则对应要展示的组件
+                // 会发现路径可以匹配成功，但是在页面上的id访问不到值，没有发生变化，是因为prop没有定义id
+                { path: '/user/:id', component: User , props:true},
+                { path: '/info', component: Info , props:{uname:'mike', age:12}},
+                { path: '/pro/:id', component: UserinfoPro , 
+                props:route =>({
+                    uname:'andy',
+                    age: 25,
+                    id: route.params.id
+                })},
+
+                // childre:[]表示子路由规则
+                {
+                    path: '/register', component: Register,
+                    children: [
+                        // 创建子路由实例对象规则
+                        { path: '/register/tab1', component: Tab1 },
+                        { path: '/register/tab2', component: Tab2 },
+
+                    ]
+                }
+
+            ]
+        })
+
+        var vm = new Vue({
+            el: '#app',
+            data: {
+
+            },
+            // 6.把路由挂载到vue实例中，Vue中有router这个属性，然后这个属性值就等于上面第5步创建的路由实例对象
+            // router:router, 属性名称和属性值是一样的直接简写
+            router: router
+
+        });
+
+
+    </script>
+</body>
+
+</html>
